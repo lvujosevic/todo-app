@@ -44,17 +44,6 @@ function addTask() {
   input.value = "";
 }
 
-// Create task
-function createTask(taskText, completed) {
-  const li = document.createElement("li");
-
-  const span = document.createElement("span");
-  span.textContent = taskText;
-
-  if (completed) {
-    span.classList.add("completed");
-  }
-
   // COMPLETE BUTTON
   const checkBtn = document.createElement("button");
   checkBtn.textContent = "✓";
