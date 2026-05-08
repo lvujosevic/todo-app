@@ -8,15 +8,15 @@ let currentFilter = "all";
 
 let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 
-// LOAD TASKS
+// LOAD
 window.addEventListener("load", () => {
   renderTasks();
 });
 
-// ADD TASK BUTTON
+// ADD BUTTON
 addBtn.addEventListener("click", addTask);
 
-// ENTER KEY SUPPORT
+// ENTER KEY
 input.addEventListener("keydown", e => {
   if (e.key === "Enter") {
     addTask();
@@ -43,25 +43,24 @@ function addTask() {
   input.value = "";
 }
 
-// SAVE TASKS
+// SAVE
 function saveTasks() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
-// UPDATE COUNTER
+// COUNTER
 function updateCounter() {
   const total = tasks.length;
   const completed = tasks.filter(task => task.completed).length;
   const active = total - completed;
 
-  if (total === 0) {
-    counter.textContent = "No tasks yet";
-  } else {
-    counter.textContent = `${active} active / ${total} total tasks`;
-  }
+  counter.textContent =
+    total === 0
+      ? "No tasks yet"
+      : `${active} active / ${total} total tasks`;
 }
 
-// SET ACTIVE FILTER
+// ACTIVE FILTER UI
 function setActiveFilter(activeBtn) {
   filterButtons.forEach(btn => {
     btn.classList.remove("active");
@@ -70,7 +69,7 @@ function setActiveFilter(activeBtn) {
   activeBtn.classList.add("active");
 }
 
-// FILTER BUTTON EVENTS
+// FILTER EVENTS
 filterButtons.forEach(btn => {
   btn.addEventListener("click", () => {
     currentFilter = btn.dataset.filter;
@@ -81,7 +80,7 @@ filterButtons.forEach(btn => {
   });
 });
 
-// HELPER FUNCTION FOR BUTTONS
+// BUTTON HELPER
 function createButton(text, className, onClick) {
   const button = document.createElement("button");
 
@@ -93,7 +92,7 @@ function createButton(text, className, onClick) {
   return button;
 }
 
-// RENDER TASKS
+// RENDER
 function renderTasks() {
   taskList.innerHTML = "";
 
@@ -110,7 +109,7 @@ function renderTasks() {
   filteredTasks.forEach(task => {
     const li = document.createElement("li");
 
-    // TASK TEXT
+    // TEXT
     const span = document.createElement("span");
     span.textContent = task.text;
 
@@ -118,7 +117,7 @@ function renderTasks() {
       span.classList.add("completed");
     }
 
-    // COMPLETE BUTTON
+    // COMPLETE
     const completeBtn = createButton(
       "✓",
       "complete-btn",
@@ -130,7 +129,7 @@ function renderTasks() {
       }
     );
 
-    // EDIT BUTTON
+    // EDIT
     const editBtn = createButton(
       "Edit",
       "edit-btn",
@@ -146,7 +145,7 @@ function renderTasks() {
       }
     );
 
-    // DELETE BUTTON
+    // DELETE
     const deleteBtn = createButton(
       "Delete",
       "delete-btn",
@@ -158,7 +157,7 @@ function renderTasks() {
       }
     );
 
-    // BUTTON CONTAINER
+    // BUTTON WRAPPER
     const buttonContainer = document.createElement("div");
     buttonContainer.classList.add("task-buttons");
 
@@ -166,7 +165,7 @@ function renderTasks() {
     buttonContainer.appendChild(editBtn);
     buttonContainer.appendChild(deleteBtn);
 
-    // APPEND ELEMENTS
+    // APPEND
     li.appendChild(span);
     li.appendChild(buttonContainer);
 
