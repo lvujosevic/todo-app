@@ -107,6 +107,18 @@ function createTask(taskText, completed) {
 
 // Save tasks
 function saveTasks() {
+  const tasks = [];
+
+  document.querySelectorAll("#task-list li").forEach(li => {
+    const text = li.querySelector("span").textContent;
+    const completed = li.querySelector("span").classList.contains("completed");
+
+    tasks.push({
+      text,
+      completed
+    });
+  });
+
   localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
