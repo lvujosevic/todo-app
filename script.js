@@ -4,30 +4,20 @@ const taskList = document.getElementById("task-list");
 const counter = document.getElementById("task-counter");
 const filterButtons = document.querySelectorAll(".filter-btn");
 
-let currentFilter = "all";
-
 let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 
-// LOAD
+let currentFilter = "all";
+
+// LOAD TASKS
 window.addEventListener("load", () => {
   renderTasks();
-});
-
-// ADD BUTTON
-addBtn.addEventListener("click", addTask);
-
-// ENTER KEY
-input.addEventListener("keydown", e => {
-  if (e.key === "Enter") {
-    addTask();
-  }
 });
 
 // ADD TASK
 function addTask() {
   const taskText = input.value.trim();
 
-  if (!taskText) return;
+  if (taskText === "") return;
 
   const newTask = {
     id: Date.now(),
@@ -43,24 +33,35 @@ function addTask() {
   input.value = "";
 }
 
-// SAVE
+// BUTTON EVENT
+addBtn.addEventListener("click", addTask);
+
+// ENTER SUPPORT
+input.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    addTask();
+  }
+});
+
+// SAVE TASKS
 function saveTasks() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
-// COUNTER
+// UPDATE COUNTER
 function updateCounter() {
   const total = tasks.length;
   const completed = tasks.filter(task => task.completed).length;
   const active = total - completed;
 
-  counter.textContent =
-    total === 0
-      ? "No tasks yet"
-      : `${active} active / ${total} total tasks`;
+  if (total === 0) {
+    counter.textContent = "No tasks yet";
+  } else {
+    counter.textContent = `${active} active / ${total} total tasks`;
+  }
 }
 
-// ACTIVE FILTER UI
+// ACTIVE FILTER
 function setActiveFilter(activeBtn) {
   filterButtons.forEach(btn => {
     btn.classList.remove("active");
@@ -92,12 +93,13 @@ function createButton(text, className, onClick) {
   return button;
 }
 
-// RENDER
+// RENDER TASKS
 function renderTasks() {
   taskList.innerHTML = "";
 
   let filteredTasks = tasks;
 
+  // FILTERS
   if (currentFilter === "active") {
     filteredTasks = tasks.filter(task => !task.completed);
   }
@@ -106,10 +108,11 @@ function renderTasks() {
     filteredTasks = tasks.filter(task => task.completed);
   }
 
+  // LOOP TASKS
   filteredTasks.forEach(task => {
     const li = document.createElement("li");
 
-    // TEXT
+    // TASK TEXT
     const span = document.createElement("span");
     span.textContent = task.text;
 
@@ -117,7 +120,7 @@ function renderTasks() {
       span.classList.add("completed");
     }
 
-    // COMPLETE
+    // COMPLETE BUTTON
     const completeBtn = createButton(
       "✓",
       "complete-btn",
@@ -129,14 +132,14 @@ function renderTasks() {
       }
     );
 
-    // EDIT
+    // EDIT BUTTON
     const editBtn = createButton(
       "Edit",
       "edit-btn",
       () => {
         const newText = prompt("Edit task:", task.text);
 
-        if (!newText || !newText.trim()) return;
+        if (!newText || newText.trim() === "") return;
 
         task.text = newText.trim();
 
@@ -145,7 +148,7 @@ function renderTasks() {
       }
     );
 
-    // DELETE
+    // DELETE BUTTON
     const deleteBtn = createButton(
       "Delete",
       "delete-btn",
@@ -157,7 +160,7 @@ function renderTasks() {
       }
     );
 
-    // BUTTON WRAPPER
+    // BUTTON CONTAINER
     const buttonContainer = document.createElement("div");
     buttonContainer.classList.add("task-buttons");
 
