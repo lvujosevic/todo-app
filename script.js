@@ -5,38 +5,37 @@ const counter = document.getElementById("task-counter");
 const filterButtons = document.querySelectorAll(".filter-btn");
 
 let currentFilter = "all";
-let tasks = [];
 
-// Load saved tasks
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+// LOAD
 window.addEventListener("load", () => {
-  const savedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
-
-  tasks = savedTasks;
   renderTasks();
-
-  updateCounter();
 });
 
-// Add task button
+// ADD TASK
 addBtn.addEventListener("click", addTask);
 
-// Enter key support
-input.addEventListener("keydown", function (e) {
+// ENTER SUPPORT
+input.addEventListener("keydown", e => {
   if (e.key === "Enter") {
     addTask();
   }
 });
 
-// Add task function
+// ADD TASK FUNCTION
 function addTask() {
   const taskText = input.value.trim();
 
   if (!taskText) return;
 
-  tasks.push({
+  const newTask = {
+    id: Date.now(),
     text: taskText,
     completed: false
-  });
+  };
+
+  tasks.push(newTask);
 
   saveTasks();
   renderTasks();
@@ -44,88 +43,15 @@ function addTask() {
   input.value = "";
 }
 
-// Create task
-function createTask(taskText, completed) {
-  const li = document.createElement("li");
-
-  const span = document.createElement("span");
-  span.textContent = taskText;
-
-  if (completed) {
-    span.classList.add("completed");
-  }
-
-  // COMPLETE BUTTON
-  const checkBtn = document.createElement("button");
-  checkBtn.textContent = "✓";
-  checkBtn.classList.add("complete-btn");
-
-  checkBtn.addEventListener("click", () => {
-    span.classList.toggle("completed");
-    saveTasks();
-    updateCounter();
-  });
-
-  // EDIT BUTTON
-  const editBtn = document.createElement("button");
-  editBtn.textContent = "Edit";
-  editBtn.classList.add("edit-btn");
-
-  editBtn.addEventListener("click", () => {
-    const newText = prompt("Edit task:", span.textContent);
-
-    if (newText && newText.trim() !== "") {
-      span.textContent = newText.trim();
-      saveTasks();
-    }
-  });
-
-  // DELETE BUTTON
-  const deleteBtn = document.createElement("button");
-  deleteBtn.textContent = "Delete";
-  deleteBtn.classList.add("delete-btn");
-
-  deleteBtn.addEventListener("click", () => {
-    li.remove();
-    saveTasks();
-    updateCounter();
-  });
-
-  // BUTTON CONTAINER
-  const buttonContainer = document.createElement("div");
-  buttonContainer.classList.add("task-buttons");
-
-  buttonContainer.appendChild(checkBtn);
-  buttonContainer.appendChild(editBtn);
-  buttonContainer.appendChild(deleteBtn);
-
-  // APPEND ELEMENTS
-  li.appendChild(span);
-  li.appendChild(buttonContainer);
-  taskList.appendChild(li);
-}
-
-// Save tasks
+// SAVE TASKS
 function saveTasks() {
-  const tasks = [];
-
-  document.querySelectorAll("#task-list li").forEach(li => {
-    const text = li.querySelector("span").textContent;
-    const completed = li.querySelector("span").classList.contains("completed");
-
-    tasks.push({
-      text,
-      completed
-    });
-  });
-
   localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
-// Update counter
+// UPDATE COUNTER
 function updateCounter() {
   const total = tasks.length;
-  const completed = tasks.filter(t => t.completed).length;
+  const completed = tasks.filter(task => task.completed).length;
   const active = total - completed;
 
   if (total === 0) {
@@ -134,6 +60,8 @@ function updateCounter() {
     counter.textContent = `${active} active / ${total} total tasks`;
   }
 }
+
+// FILTER BUTTONS
 filterButtons.forEach(btn => {
   btn.addEventListener("click", () => {
     currentFilter = btn.dataset.filter;
@@ -143,6 +71,7 @@ filterButtons.forEach(btn => {
   });
 });
 
+// ACTIVE FILTER UI
 function setActiveFilter(activeBtn) {
   filterButtons.forEach(btn => {
     btn.classList.remove("active");
@@ -151,22 +80,36 @@ function setActiveFilter(activeBtn) {
   activeBtn.classList.add("active");
 }
 
+// HELPER BUTTON CREATOR
+function createButton(text, className, onClick) {
+  const button = document.createElement("button");
+
+  button.textContent = text;
+  button.classList.add(className);
+
+  button.addEventListener("click", onClick);
+
+  return button;
+}
+
+// RENDER TASKS
 function renderTasks() {
   taskList.innerHTML = "";
 
   let filteredTasks = tasks;
 
   if (currentFilter === "active") {
-    filteredTasks = tasks.filter(t => !t.completed);
+    filteredTasks = tasks.filter(task => !task.completed);
   }
 
   if (currentFilter === "completed") {
-    filteredTasks = tasks.filter(t => t.completed);
+    filteredTasks = tasks.filter(task => task.completed);
   }
 
-  filteredTasks.forEach((task, index) => {
+  filteredTasks.forEach(task => {
     const li = document.createElement("li");
 
+    // TASK TEXT
     const span = document.createElement("span");
     span.textContent = task.text;
 
@@ -174,50 +117,55 @@ function renderTasks() {
       span.classList.add("completed");
     }
 
-    // complete
-    const checkBtn = document.createElement("button");
-    checkBtn.textContent = "✓";
-    checkBtn.classList.add("complete-btn");
+    // COMPLETE BUTTON
+    const completeBtn = createButton(
+      "✓",
+      "complete-btn",
+      () => {
+        task.completed = !task.completed;
 
-    checkBtn.addEventListener("click", () => {
-      task.completed = !task.completed;
-      saveTasks();
-      renderTasks();
-    });
-
-    // edit
-    const editBtn = document.createElement("button");
-    editBtn.textContent = "Edit";
-    editBtn.classList.add("edit-btn");
-
-    editBtn.addEventListener("click", () => {
-      const newText = prompt("Edit task:", task.text);
-
-      if (newText && newText.trim()) {
-        task.text = newText.trim();
         saveTasks();
         renderTasks();
       }
-    });
+    );
 
-    // delete
-    const deleteBtn = document.createElement("button");
-    deleteBtn.textContent = "Delete";
-    deleteBtn.classList.add("delete-btn");
+    // EDIT BUTTON
+    const editBtn = createButton(
+      "Edit",
+      "edit-btn",
+      () => {
+        const newText = prompt("Edit task:", task.text);
 
-    deleteBtn.addEventListener("click", () => {
-      tasks.splice(index, 1);
-      saveTasks();
-      renderTasks();
-    });
+        if (!newText || !newText.trim()) return;
 
+        task.text = newText.trim();
+
+        saveTasks();
+        renderTasks();
+      }
+    );
+
+    // DELETE BUTTON
+    const deleteBtn = createButton(
+      "Delete",
+      "delete-btn",
+      () => {
+        tasks = tasks.filter(t => t.id !== task.id);
+
+        saveTasks();
+        renderTasks();
+      }
+    );
+
+    // BUTTON CONTAINER
     const buttonContainer = document.createElement("div");
     buttonContainer.classList.add("task-buttons");
 
-    buttonContainer.appendChild(checkBtn);
+    buttonContainer.appendChild(completeBtn);
     buttonContainer.appendChild(editBtn);
     buttonContainer.appendChild(deleteBtn);
 
+    // APPEND
     li.appendChild(span);
     li.appendChild(buttonContainer);
 
